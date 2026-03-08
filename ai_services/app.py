@@ -6,15 +6,12 @@ import mailparser
 import re
 import uvicorn
 import os
-import requests
-import base64
 
-app = FastAPI(title="🛡️ AI Phishing Shield (Hierarchical Defense)")
+app = FastAPI(title="AI Phishing Shield")
 
 # --- CẤU HÌNH ---
-VT_API_KEY = "a51201a756c4b0a0bc7e5c93b7912827964db0cc07f9533a80d9d233f1e91bc0" # se dung env sau
-SUSPICIOUS_KEYWORDS = ['bit.ly', 't.co', 'tinyurl', 'login-verify', 'secure-update', 'account-alert', 'verify', 'banking', 'update-account']
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+device = "cuda" if torch.cuda.is_available() else "cpu"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # --- TẢI MODEL AI ---
@@ -41,28 +38,30 @@ try:
 except Exception as e:
     print(f" URL model error: {e}")
 
-# --- CÁC HÀM BỔ TRỢ ---
 
-def check_with_keywords(url):
-    return any(key in url.lower() for key in SUSPICIOUS_KEYWORDS)
+def analyze_email_model(subject, body):
+    """Analyze email content using AI model only"""
+    if email_model and email_tokenizer:
+        try:
+            combined_text = f"Subject: {subject}. Content: {body}"
+            inputs = email_tokenizer(combined_text, truncation=True, padding=True, max_length=128, return_tensors="pt").to(device)
+            # DistilBERT doesn't use token_type_ids; remove if present
+            if 'token_type_ids' in inputs:
+                del inputs['token_type_ids']
+            with torch.no_grad():
+                outputs = email_model(**inputs)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=-1).cpu().numpy()[0]
+            predicted_class = np.argmax(probs)
+            is_phishing = bool(predicted_class == 1)
+            confidence = round(float(probs[predicted_class]), 4)
+            return is_phishing, confidence
+        except Exception as e:
+            print(f" Email Model failed. Error: {e}")
+            return False, 0.0
+    return False, 0.0
 
-def check_with_virustotal(url):
-    """Kiểm tra URL bằng VirusTotal API"""
-    try:
-        url_id = base64.urlsafe_b64encode(url.encode()).decode().strip("=")
-        endpoint = f"https://www.virustotal.com/api/v3/urls/{url_id}"
-        headers = {"x-apikey": VT_API_KEY}
-        response = requests.get(endpoint, headers=headers, timeout=5)
-        if response.status_code == 200:
-            stats = response.json()['data']['attributes']['last_analysis_stats']
-            is_malicious = (stats['malicious'] + stats['phishing']) > 0
-            return is_malicious, True 
-    except:
-        pass
-    return False, False # Thất bại (hết lượt hoặc lỗi mạng)
-
-def analyze_url_hierarchical(url):
-    # LỚP 1: URL AI MODEL
+def analyze_url_model(url):
+    """Analyze URL using AI model only"""
     if url_model and url_tokenizer:
         try:
             inputs = url_tokenizer(url, truncation=True, padding=True, max_length=128, return_tensors="pt").to(device)
@@ -72,20 +71,13 @@ def analyze_url_hierarchical(url):
             with torch.no_grad():
                 outputs = url_model(**inputs)
                 probs = torch.nn.functional.softmax(outputs.logits, dim=-1).cpu().numpy()[0]
-            if np.argmax(probs) == 1: # Phishing
-                return True, "url_ai_model"
-            # Nếu AI bảo an toàn, vẫn trả về để ghi nhận phương thức
-            return False, "url_ai_model"
+            is_phishing = bool(np.argmax(probs) == 1)
+            confidence = round(float(probs[np.argmax(probs)]), 4)
+            return is_phishing, confidence
         except Exception as e:
-            print(f" URL Model failed for {url}, falling back... Error: {e}")
-
-    # LỚP 2: VIRUSTOTAL 
-    is_malicious_vt, success = check_with_virustotal(url)
-    if success:
-        return is_malicious_vt, "virustotal"
-
-    # LỚP 3: KEYWORDS 
-    return check_with_keywords(url), "keywords_fallback"
+            print(f" URL Model failed for {url}. Error: {e}")
+            return False, 0.0
+    return False, 0.0
 
 def extract_urls(text):
     # Lọc bỏ các URL rác như xml, xhtml để tránh AI báo nhầm
@@ -101,21 +93,7 @@ async def predict(payload: dict):
     body = payload.get("content", "")
 
     try:
-        combined_text = f"Subject: {subject}. Content: {body}"
-        is_ai_phishing = False
-        ai_confidence = 0.0
-        
-        if email_model:
-            inputs = email_tokenizer(combined_text, truncation=True, padding=True, max_length=128, return_tensors="pt").to(device)
-            # DistilBERT doesn't use token_type_ids; remove if present
-            if 'token_type_ids' in inputs:
-                del inputs['token_type_ids']
-            with torch.no_grad():
-                outputs = email_model(**inputs)
-                probs = torch.nn.functional.softmax(outputs.logits, dim=-1).cpu().numpy()[0]
-            predicted_class = np.argmax(probs)
-            is_ai_phishing = bool(predicted_class == 1)
-            ai_confidence = round(float(probs[predicted_class]), 4)
+        is_ai_phishing, ai_confidence = analyze_email_model(subject, body)
         
         final_verdict = "DANGEROUS" if is_ai_phishing else "SAFE"
         return {
@@ -139,43 +117,22 @@ async def predict_eml(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Only .eml files allowed")
 
     try:
-        # --- BƯỚC 1: ĐỌC VÀ PHÂN TÍCH FILE EML ---
+
         raw_content = await file.read()
         mail = mailparser.parse_from_bytes(raw_content)
         subject = mail.subject or "No Subject"
         body = mail.body or ""
         
-        # --- BƯỚC 2: TÁCH URL (TRƯỚC KHI CHẠY MODEL) ---
         urls = extract_urls(body)
         
-        # --- BƯỚC 3: CHẠY EMAIL AI MODEL (KIỂM TRA NỘI DUNG) ---
-        combined_text = f"Subject: {subject}. Content: {body}"
-        is_ai_phishing = False
-        ai_confidence = 0.0
-        
-        if email_model:
-            inputs = email_tokenizer(combined_text, truncation=True, padding=True, max_length=128, return_tensors="pt").to(device)
-            # DistilBERT doesn't use token_type_ids; remove if present
-            if 'token_type_ids' in inputs:
-                del inputs['token_type_ids']
-            with torch.no_grad():
-                outputs = email_model(**inputs)
-                probs = torch.nn.functional.softmax(outputs.logits, dim=-1).cpu().numpy()[0]
-            predicted_class = np.argmax(probs)
-            is_ai_phishing = bool(predicted_class == 1)
-            ai_confidence = round(float(probs[predicted_class]), 4)
+        is_ai_phishing, ai_confidence = analyze_email_model(subject, body)
 
-        # --- BƯỚC 4: CHẠY URL MODEL & FALLBACK TRÊN DANH SÁCH URL ĐÃ TÁCH ---
         suspicious_urls = []
-        methods_used = []
+        for url in urls[:5]:
+            is_phishing, confidence = analyze_url_model(url)
+            if is_phishing:
+                suspicious_urls.append({"url": url, "confidence": confidence})
 
-        for url in urls[:5]: # Kiểm tra tối đa 5 link để đảm bảo hiệu năng
-            is_bad, method = analyze_url_hierarchical(url)
-            methods_used.append(method)
-            if is_bad:
-                suspicious_urls.append({"url": url, "method": method})
-
-        # --- BƯỚC 5: TỔNG HỢP KẾT QUẢ CUỐI CÙNG ---
         final_verdict = "SAFE"
         if is_ai_phishing or len(suspicious_urls) > 0:
             final_verdict = "DANGEROUS"
@@ -186,8 +143,7 @@ async def predict_eml(file: UploadFile = File(...)):
                 "email_content_ai": "PHISHING" if is_ai_phishing else "NORMAL",
                 "ai_confidence": ai_confidence,
                 "urls_extracted": urls, # Hiển thị các URL đã tách được
-                "suspicious_urls_found": suspicious_urls,
-                "url_check_methods": list(set(methods_used)) # Các phương thức đã dùng
+                "suspicious_urls_found": suspicious_urls
             },
             "final_verdict": final_verdict
         }
@@ -199,8 +155,8 @@ async def predict_eml(file: UploadFile = File(...)):
 async def predict_url(payload: dict):
     url = payload.get("url")
     if not url: raise HTTPException(status_code=400, detail="Missing URL")
-    is_bad, method = analyze_url_hierarchical(url)
-    return {"url": url, "is_phishing": is_bad, "method_used": method}
+    is_phishing, confidence = analyze_url_model(url)
+    return {"url": url, "is_phishing": is_phishing, "confidence": confidence}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
