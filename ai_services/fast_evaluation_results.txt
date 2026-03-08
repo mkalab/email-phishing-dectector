@@ -1,3 +1,4 @@
+email model
               precision    recall  f1-score   support
 
       Normal       0.99      0.99      0.99     21738
@@ -6,3 +7,22 @@
     accuracy                           0.99     40604
    macro avg       0.99      0.99      0.99     40604
 weighted avg       0.99      0.99      0.99     40604
+
+
+
+
+url model
+
+(Accuracy) tổng thể: 0.998723
+
+Đối với lớp 0 (Hợp lệ - Legitimate):
+	Precision: 0.998440
+	Recall: 0.999899
+	F1-score: 0.999169
+	Support: 69148
+
+Đối với lớp 1 (Lừa đảo - Phishing):
+	Precision: 0.999663
+	Recall: 0.994830
+	F1-score: 0.997241
+	Support: 20888
