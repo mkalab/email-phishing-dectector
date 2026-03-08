@@ -1,0 +1,52 @@
+﻿# Python Virtual Environment
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Large Model Files (can be regenerated)
+phishing_classifier_final/
+url_phishing_classifier_final/
+
+# Logs
+*.log
+logs/
+
+# Temp Files
+*.tmp
+*.bak
+*.backup
+.cache/
+
+# Browser Extension Build
+phishing_extension/dist/
