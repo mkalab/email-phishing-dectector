@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-container">
+            <img src="../icons/icon48.png" alt="Logo" class="main-icon">
+            <h2 class="title">AI Phishing Shield</h2>
+        </div>
+        
+        <input type="file" id="fileInput" hidden accept=".eml">
+        
+        <!-- Tabs for switching between Email and URL scanning -->
+        <div class="tabs">
+            <button id="emailTab" class="tab active">Quét Email</button>
+            <button id="urlTab" class="tab">Quét URL</button>
+        </div>
+        
+        <div id="emailSection">
+            <div id="dropZone" class="drop-zone">
+                <p class="drop-text">Nhấn để chọn hoặc thả file <b>.eml</b></p>
+            </div>
+        </div>
+        
+        <div id="urlSection" class="hidden">
+            <input type="url" id="urlInput" placeholder="Nhập URL để quét (vd: https://example.com)" class="url-input">
+            <button id="scanUrlBtn" class="scan-btn">Quét URL</button>
+        </div>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p class="loading-text">Đang phân tích...</p>
+        </div>
+
+        <div id="resultArea" class="hidden">
+            <div id="contentRes" class="res-line"></div>
+            <div id="urlRes" class="res-line"></div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

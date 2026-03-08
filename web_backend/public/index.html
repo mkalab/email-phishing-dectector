@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Phishing Shield</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gradient text-white min-h-screen">
+    <div class="container mx-auto max-w-4xl py-20 px-4">
+        <header class="text-center mb-12 animate__animated animate__fadeInDown">
+            <img src="icon48.png" alt="Logo" class="main-icon">
+            <h1 class="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                AI PHISHING SHIELD
+            </h1>
+            <p class="text-gray-400 text-lg text-glow">Bảo vệ hòm thư bằng Trí tuệ nhân tạo DistilBERT</p>
+        </header>
+
+        <main class="glass rounded-3xl p-10 shadow-2xl animate__animated animate__zoomIn">
+            <div id="uploadContainer" class="text-center">
+                <div id="dropZone" class="border-3 border-dashed border-blue-500/30 rounded-2xl p-12 hover:border-blue-400 transition-all cursor-pointer group">
+                    <div class="icon-circle bg-blue-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </div>
+                    <p class="text-xl font-semibold mb-2">Tải lên email để quét</p>
+                    <p class="text-gray-500 mb-6">Hỗ trợ định dạng .eml</p>
+                    <input type="file" id="fileInput" class="hidden" accept=".eml">
+                    <button onclick="document.getElementById('fileInput').click()" class="btn-primary bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition-all shadow-lg">Chọn File</button>
+                </div>
+            </div>
+
+            <!-- URL Scanning Section -->
+            <div class="mt-12 text-center">
+                <div class="border-t border-white/10 pt-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-300">Hoặc quét URL trực tiếp</h2>
+                    <div class="max-w-md mx-auto">
+                        <input type="url" id="urlInput" placeholder="Nhập URL để quét (vd: https://example.com)" 
+                               class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 transition-colors">
+                        <button id="scanUrlBtn" class="mt-4 w-full btn-primary bg-emerald-600 hover:bg-emerald-500 px-8 py-3 rounded-xl font-bold transition-all shadow-lg">
+                            Quét URL
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loading" class="hidden text-center py-10">
+                <div class="spinner inline-block rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+            </div>
+
+            <div id="result" class="hidden animate__animated animate__fadeInUp">
+                <div id="verdictBanner" class="rounded-2xl p-6 mb-8 text-center text-2xl font-bold shadow-inner"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="stat-card bg-white/5 p-6 rounded-2xl border border-white/10">
+                        <p class="text-gray-400 mb-1">Độ tin cậy AI</p>
+                        <h3 id="aiConf" class="text-3xl font-mono text-blue-400">0%</h3>
+                    </div>
+                    <div class="stat-card bg-white/5 p-6 rounded-2xl border border-white/10">
+                        <p class="text-gray-400 mb-1">Mối đe dọa URL</p>
+                        <h3 id="urlThreat" class="text-3xl font-mono text-emerald-400">0</h3>
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="mt-10 text-gray-400 hover:text-white underline block mx-auto transition-colors">Quét email khác</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

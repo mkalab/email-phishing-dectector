@@ -1,0 +1,8 @@
+﻿fastapi
+uvicorn
+torch
+transformers
+# allow numpy 1.x or 2.x; see README for migration instructions
+numpy>=1.24,<3
+mailparser
+requests

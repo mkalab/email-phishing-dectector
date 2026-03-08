@@ -1,0 +1,24 @@
+﻿{
+  "manifest_version": 3,
+  "name": "AI Phishing Shield",
+  "version": "1.2",
+  "permissions": ["scripting", "activeTab"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "host_permissions": [
+    "http://127.0.0.1:3000/*",
+    "http://localhost:3000/*",
+    "https://mail.google.com/*"
+  ] 
+}

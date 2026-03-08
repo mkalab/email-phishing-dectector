@@ -1,0 +1,160 @@
+﻿body {
+    width: 320px;
+    padding: 15px;
+    background-color: #0f172a;
+    color: white;
+    font-family: sans-serif;
+    margin: 0;
+}
+
+.title {
+    font-size: 24px; 
+    margin-top: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+    text-transform: uppercase;
+    
+    
+    background: linear-gradient(to right, #60a5fa, #34d399); /* from-blue-400 to-emerald-400 */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+.drop-zone {
+    border: 2px dashed #334155;
+    border-radius: 12px;
+    padding: 30px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.drop-zone:hover {
+    border-color: #3b82f6;
+    background-color: #1e293b;
+}
+
+.drop-text {
+    font-size: 13px;
+    color: #cbd5e1;
+}
+
+#resultArea {
+    margin-top: 15px;
+    background: #1e293b;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+}
+
+.res-line {
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.hidden { display: none; }
+.red { color: #fb7185; font-weight: bold; }
+.green { color: #4ade80; font-weight: bold; }
+
+/* Spinner hiệu ứng quay */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #3b82f6;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 11px;
+    color: #60a5fa;
+    text-align: center;
+}
+
+.header-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.main-icon {
+    width: 42px;     
+    height: 42px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5)); /* Tạo hiệu ứng phát sáng nhẹ cho icon */
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1e293b;
+}
+
+.tab {
+    flex: 1;
+    padding: 8px 12px;
+    background: #334155;
+    border: none;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+.tab.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.url-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #1e293b;
+    color: white;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.url-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.scan-btn {
+    width: 100%;
+    padding: 8px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+.scan-btn:hover {
+    background: #2563eb;
+}
+
+.url-link {
+    color: #60a5fa;
+    text-decoration: none;
+}
+
+.url-link:hover {
+    text-decoration: underline;
+}
+    letter-spacing: 0.5px;
+}

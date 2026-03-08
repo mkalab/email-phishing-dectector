@@ -1,0 +1,52 @@
+﻿/* Nền Gradient mượt mà */
+.bg-gradient {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background-attachment: fixed;
+}
+
+/* Hiệu ứng kính mờ Glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hiệu ứng phát sáng cho chữ */
+.text-glow {
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* Hiệu ứng Spinner quay */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Bo góc cho vùng Dropzone */
+.border-3 {
+    border-width: 3px;
+}
+
+/* Style cho main icon (logo) */
+.main-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem auto;
+    display: block;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+}
+
+.stat-card {
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+}
