@@ -144,6 +144,33 @@ All endpoints return JSON with an `analysis` object and `final_verdict`.
   server continues running in degraded mode and any prediction endpoint
   will raise an HTTP 500 when the model isn't available.
 
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information on:
+
+- Setting up your development environment
+- Code standards and best practices
+- Testing guidelines
+- Security requirements
+- Git workflow and pull request process
+
+### Quick Start for Contributors
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes following our guidelines
+4. Add tests and update documentation
+5. Submit a pull request
+
+### Development Team
+
+- **Maintainers**: [List maintainers here]
+- **Contributors**: See [GitHub Contributors](https://github.com/YOUR_USERNAME/YOUR_REPO/graphs/contributors)
+
+## 📋 Code of Conduct
+
+This project has adopted a Code of Conduct that we expect project participants to adhere to. Please read the [full text](CODE_OF_CONDUCT.md) so that you can understand what actions will and will not be tolerated.
+
 ## License
 
 [Add license information here if applicable.]
