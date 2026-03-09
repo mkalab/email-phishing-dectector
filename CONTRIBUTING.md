@@ -26,18 +26,74 @@
    pip install -r requirements.txt
    ```
 
-3. **Setup Node.js backend**
+3. **Setup AI Models**
+   ```bash
+   # Option 1: Download real models (recommended for production)
+   python setup_models.py --all
+
+   # Option 2: Create mock models (for development/testing only)
+   python setup_models.py --all --mock
+
+   # Option 3: Interactive setup
+   python setup_models.py
+   ```
+
+4. **Setup Node.js backend**
    ```bash
    cd web_backend
    npm install
    cd ..
    ```
 
-4. **Environment configuration**
+5. **Environment configuration**
    ```bash
    cp .env.example .env
    # Edit .env with your local settings
    ```
+
+## 🤖 Model Setup
+
+The project uses AI models that are not included in the git repository due to size and licensing considerations. You have several options:
+
+### Option 1: Download Real Models (Recommended)
+```bash
+python setup_models.py --all
+```
+This downloads the actual trained models from HuggingFace Hub.
+
+### Option 2: Create Mock Models (Development Only)
+```bash
+python setup_models.py --all --mock
+```
+Creates lightweight mock models for development and testing. **⚠️ Not suitable for production use.**
+
+### Option 3: Manual Setup
+If you have access to the trained models:
+1. Place email model files in `ai_services/phishing_classifier_final/`
+2. Place URL model files in `ai_services/url_phishing_classifier_final/`
+3. Ensure the directory structure matches the expected format
+
+### Model Files Structure
+```
+ai_services/
+├── phishing_classifier_final/     # Email classification model
+│   ├── config.json
+│   ├── pytorch_model.bin (or model.safetensors)
+│   ├── tokenizer_config.json
+│   ├── vocab.txt
+│   └── ...
+└── url_phishing_classifier_final/ # URL classification model
+    ├── config.json
+    ├── pytorch_model.bin (or model.safetensors)
+    ├── tokenizer_config.json
+    ├── vocab.txt
+    └── ...
+```
+
+### Troubleshooting Model Issues
+- **Model loading errors**: Check that model files are in correct directories
+- **Out of memory**: Use smaller models or reduce batch sizes
+- **Network issues**: Models may take time to download on slow connections
 
 5. **Download/Setup AI models**
    - Models are not included in git for security reasons

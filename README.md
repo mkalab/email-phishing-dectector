@@ -17,7 +17,29 @@ content and URLs.
    pip install -r requirements.txt
    ```
 
-   The `requirements.txt` file permits either NumPy 1.x or 2.x. **If you
+3. **Setup AI Models** (Required):
+   ```bash
+   # Download real models (recommended)
+   python setup_models.py --all
+
+   # Or create mock models for development/testing
+   python setup_models.py --all --mock
+   ```
+
+   The `setup_models.py` script will download the required AI models that are not included in the repository due to size constraints.
+
+4. Setup Node.js backend:
+   ```bash
+   cd web_backend
+   npm install
+   cd ..
+   ```
+
+5. Configure environment:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your local settings
+   ```
    intend to use NumPy 2.x**, you must ensure that all dependent packages
    that include compiled extensions (PyTorch, torchvision, TensorFlow,
    etc.) are themselves built against the NumPy 2 C API. Otherwise the
@@ -70,9 +92,10 @@ This will:
 - Start the Node.js backend
 
 ### Manual Startup Order
-1. Start AI Service: `python ai_services/app.py`
-2. Start Node.js: `cd web_backend && npm start`
-3. (Optional) Start Test UI: `python ai_services/ui.py` (runs on port 8001)
+1. **Setup models first**: `python setup_models.py --all`
+2. Start AI Service: `python ai_services/app.py`
+3. Start Node.js: `cd web_backend && npm start`
+4. (Optional) Start Test UI: `python ai_services/ui.py` (runs on port 8001)
 
 ### Health Checks
 - AI Service: http://localhost:8000/docs (FastAPI docs)
