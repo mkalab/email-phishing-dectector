@@ -36,9 +36,9 @@
 .main-icon {
     width: 120px;
     height: 120px;
-    margin: 0 auto 1.5rem auto;
-    display: block;
+    display: block; /* FIX: bỏ comment để căn giữa logo hoạt động */
     object-fit: contain;
+    margin: 0 auto 1.5rem auto;
     filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
 }
 

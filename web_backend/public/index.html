@@ -15,57 +15,139 @@
             <h1 class="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
                 AI PHISHING SHIELD
             </h1>
-            <p class="text-gray-400 text-lg text-glow">Bảo vệ hòm thư bằng Trí tuệ nhân tạo DistilBERT</p>
         </header>
 
         <main class="glass rounded-3xl p-10 shadow-2xl animate__animated animate__zoomIn">
-            <div id="uploadContainer" class="text-center">
-                <div id="dropZone" class="border-3 border-dashed border-blue-500/30 rounded-2xl p-12 hover:border-blue-400 transition-all cursor-pointer group">
-                    <div class="icon-circle bg-blue-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                        <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
+            <div class="flex justify-center mb-8">
+                <button id="emailTab" class="tab-btn active px-6 py-3 rounded-l-xl bg-blue-600 text-white font-bold">Quét Email</button>
+                <button id="urlTab" class="tab-btn px-6 py-3 rounded-r-xl bg-gray-600 text-white font-bold">Quét URL</button>
+            </div>
+
+            <!-- ===== TAB EMAIL ===== -->
+            <div id="emailSection" class="tab-content">
+
+                <!-- Upload area -->
+                <div id="uploadContainer" class="text-center">
+                    <div id="dropZone" class="border-3 border-dashed border-blue-500/30 rounded-2xl p-12 hover:border-blue-400 transition-all cursor-pointer group">
+                        <div class="icon-circle bg-blue-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <p class="text-xl font-semibold mb-2">Tải lên email để quét</p>
+                        <p class="text-gray-500 mb-6">Hỗ trợ định dạng .eml</p>
+                        <input type="file" id="fileInput" class="hidden" accept=".eml">
+                        <button onclick="document.getElementById('fileInput').click()" class="btn-primary bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition-all shadow-lg">Chọn File</button>
                     </div>
-                    <p class="text-xl font-semibold mb-2">Tải lên email để quét</p>
-                    <p class="text-gray-500 mb-6">Hỗ trợ định dạng .eml</p>
-                    <input type="file" id="fileInput" class="hidden" accept=".eml">
-                    <button onclick="document.getElementById('fileInput').click()" class="btn-primary bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition-all shadow-lg">Chọn File</button>
+                </div>
+
+                <!-- Loading email -->
+                <div id="emailLoading" class="hidden text-center py-10">
+                    <div class="spinner inline-block rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                    <p class="text-gray-400">Đang phân tích email...</p>
+                </div>
+
+                <!-- Email result -->
+                <div id="emailResult" class="hidden animate__animated animate__fadeInUp">
+                    <!-- Verdict Banner -->
+                    <div id="emailVerdictBanner" class="rounded-2xl p-6 mb-8 text-center text-2xl font-bold shadow-inner"></div>
+
+                    <!-- PHẦN 1: Phân tích nội dung email -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold mb-4 text-blue-300 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            Phân tích email
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="stat-card bg-white/5 p-5 rounded-2xl border border-white/10 flex flex-col justify-between min-h-[90px]">
+                                <p class="text-gray-400 text-sm mb-2">Độ tin cậy AI</p>
+                                <h3 id="emailAiConf" class="text-2xl font-mono text-blue-400">0%</h3>
+                            </div>
+                            <div class="stat-card bg-white/5 p-5 rounded-2xl border border-white/10 flex flex-col justify-between min-h-[90px]">
+                                <p class="text-gray-400 text-sm mb-2">Nhận định</p>
+                                <h3 id="emailVerdict" class="text-2xl font-mono text-emerald-400">—</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHẦN 2: Phân tích URLs -->
+                    <div>
+                        <h3 class="text-lg font-bold mb-4 text-emerald-300 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            Các URLs trong email
+                        </h3>
+
+                        <!-- Tổng quan 3 cột: Tổng / An toàn / Đáng ngờ -->
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div class="stat-card bg-white/5 p-4 rounded-2xl border border-white/10 text-center">
+                                <p class="text-gray-400 text-xs mb-1">Tổng URL</p>
+                                <span id="urlTotalCount" class="text-xl font-mono font-bold text-white">0</span>
+                            </div>
+                            <div class="stat-card bg-white/5 p-4 rounded-2xl border border-emerald-500/20 text-center">
+                                <p class="text-gray-400 text-xs mb-1">An toàn</p>
+                                <span id="urlSafeCount" class="text-xl font-mono font-bold text-emerald-400">0</span>
+                            </div>
+                            <div class="stat-card bg-white/5 p-4 rounded-2xl border border-red-500/20 text-center">
+                                <p class="text-gray-400 text-xs mb-1">Đáng ngờ</p>
+                                <span id="urlThreatCount" class="text-xl font-mono font-bold text-emerald-400">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Danh sách URL AN TOÀN -->
+                        <div class="bg-white/5 rounded-2xl border border-white/10 p-5 mb-3">
+                            <p class="text-emerald-300 text-sm font-semibold mb-3 flex items-center gap-2">
+                                <span>✅</span> URL an toàn
+                            </p>
+                            <ul id="safeUrlsList" class="space-y-2 text-sm"></ul>
+                        </div>
+
+                        <!-- Danh sách URL ĐÁNG NGỜ -->
+                        <div class="bg-white/5 rounded-2xl border border-white/10 p-5">
+                            <p class="text-red-300 text-sm font-semibold mb-3 flex items-center gap-2">
+                                <span>⚠️</span> URL đáng ngờ
+                            </p>
+                            <ul id="suspiciousUrlsList" class="space-y-2 text-sm"></ul>
+                        </div>
+                    </div>
+
+                    <button onclick="resetEmailScan()" class="mt-10 text-gray-400 hover:text-white underline block mx-auto transition-colors">Quét lại</button>
                 </div>
             </div>
 
-            <!-- URL Scanning Section -->
-            <div class="mt-12 text-center">
-                <div class="border-t border-white/10 pt-8">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-300">Hoặc quét URL trực tiếp</h2>
+            <!-- ===== TAB URL ===== -->
+            <div id="urlSection" class="tab-content hidden">
+
+                <!-- URL input -->
+                <div id="urlInputContainer" class="text-center">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-300">Quét URL trực tiếp</h2>
                     <div class="max-w-md mx-auto">
-                        <input type="url" id="urlInput" placeholder="Nhập URL để quét (vd: https://example.com)" 
+                        <input type="url" id="urlInput" placeholder="Nhập URL để quét (vd: https://example.com)"
                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 transition-colors">
                         <button id="scanUrlBtn" class="mt-4 w-full btn-primary bg-emerald-600 hover:bg-emerald-500 px-8 py-3 rounded-xl font-bold transition-all shadow-lg">
                             Quét URL
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <div id="loading" class="hidden text-center py-10">
-                <div class="spinner inline-block rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
-            </div>
-
-            <div id="result" class="hidden animate__animated animate__fadeInUp">
-                <div id="verdictBanner" class="rounded-2xl p-6 mb-8 text-center text-2xl font-bold shadow-inner"></div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="stat-card bg-white/5 p-6 rounded-2xl border border-white/10">
-                        <p class="text-gray-400 mb-1">Độ tin cậy AI</p>
-                        <h3 id="aiConf" class="text-3xl font-mono text-blue-400">0%</h3>
-                    </div>
-                    <div class="stat-card bg-white/5 p-6 rounded-2xl border border-white/10">
-                        <p class="text-gray-400 mb-1">Mối đe dọa URL</p>
-                        <h3 id="urlThreat" class="text-3xl font-mono text-emerald-400">0</h3>
-                    </div>
+                <!-- Loading URL -->
+                <div id="urlLoading" class="hidden text-center py-10">
+                    <div class="spinner inline-block rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
+                    <p class="text-gray-400">Đang phân tích URL...</p>
                 </div>
-                <button onclick="location.reload()" class="mt-10 text-gray-400 hover:text-white underline block mx-auto transition-colors">Quét email khác</button>
+
+                <!-- URL result -->
+                <div id="urlResult" class="hidden animate__animated animate__fadeInUp">
+                    <!-- Verdict Banner (kết quả duy nhất) -->
+                    <div id="urlVerdictBanner" class="rounded-2xl p-6 mb-8 text-center text-2xl font-bold shadow-inner"></div>
+
+                    <button onclick="resetUrlScan()" class="mt-2 text-gray-400 hover:text-white underline block mx-auto transition-colors">Quét lại</button>
+                </div>
             </div>
+
         </main>
     </div>
 

@@ -2,7 +2,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import numpy as np
-import mailparser
+import email
+from email.policy import default
 import re
 import uvicorn
 import os
@@ -80,9 +81,22 @@ def analyze_url_model(url):
     return False, 0.0
 
 def extract_urls(text):
-    # Lọc bỏ các URL rác như xml, xhtml để tránh AI báo nhầm
-    urls = re.findall(r'(https?://[^\s<>"]+|www\.[^\s<>"]+)', text)
-    return [u for u in urls if not any(ext in u for ext in ['.png', '.jpg', '.xml', 'xhtml'])]
+    # 1. Ưu tiên lấy URL từ href="..." trong HTML email (bắt được <a href="https://...">)
+    href_urls = re.findall(r'href=["\']?(https?://[^"\'>\s]+)', text, re.IGNORECASE)
+    # 2. Lấy URL plain text trong nội dung
+    plain_urls = re.findall(r'(https?://[^\s<>"\']+)', text)
+    # Gộp lại, giữ thứ tự, loại trùng
+    seen = set()
+    all_urls = []
+    for u in href_urls + plain_urls:
+        # Bỏ dấu chấm/ngoặc thừa ở cuối URL
+        u = u.rstrip('.,;)')
+        if u not in seen:
+            seen.add(u)
+            all_urls.append(u)
+    # Loại bỏ URL tài nguyên tĩnh không cần quét
+    SKIP_EXT = ('.png', '.jpg', '.jpeg', '.gif', '.svg', '.xml', '.css', 'xhtml')
+    return [u for u in all_urls if not any(u.lower().endswith(ext) or ext in u for ext in SKIP_EXT)]
 
 # --- API ENDPOINTS ---
 
@@ -119,9 +133,19 @@ async def predict_eml(file: UploadFile = File(...)):
     try:
 
         raw_content = await file.read()
-        mail = mailparser.parse_from_bytes(raw_content)
-        subject = mail.subject or "No Subject"
-        body = mail.body or ""
+        msg = email.message_from_bytes(raw_content, policy=default)
+        subject = msg.get('subject') or "No Subject"
+        
+        # Extract body
+        if msg.is_multipart():
+            body = '\n'.join(
+                part.get_payload(decode=True).decode(errors='ignore')
+                for part in msg.get_payload()
+                if part.get_content_type().startswith('text/')
+            )
+        else:
+            payload = msg.get_payload(decode=True)
+            body = payload.decode(errors='ignore') if isinstance(payload, bytes) else (payload or "")
         
         urls = extract_urls(body)
         
@@ -142,7 +166,8 @@ async def predict_eml(file: UploadFile = File(...)):
             "analysis": {
                 "email_content_ai": "PHISHING" if is_ai_phishing else "NORMAL",
                 "ai_confidence": ai_confidence,
-                "urls_extracted": urls, # Hiển thị các URL đã tách được
+                "all_urls_found": urls,
+                "total_urls_found": len(urls),
                 "suspicious_urls_found": suspicious_urls
             },
             "final_verdict": final_verdict

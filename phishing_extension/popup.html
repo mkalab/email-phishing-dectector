@@ -1,44 +1,66 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <div class="container">
-        <div class="header-container">
+
+        <div class="header">
             <img src="../icons/icon48.png" alt="Logo" class="main-icon">
-            <h2 class="title">AI Phishing Shield</h2>
+            <h1 class="title">AI PHISHING SHIELD</h1>
         </div>
-        
-        <input type="file" id="fileInput" hidden accept=".eml">
-        
-        <!-- Tabs for switching between Email and URL scanning -->
+
         <div class="tabs">
             <button id="emailTab" class="tab active">Quét Email</button>
             <button id="urlTab" class="tab">Quét URL</button>
         </div>
-        
+
+        <!-- EMAIL -->
         <div id="emailSection">
             <div id="dropZone" class="drop-zone">
+                <div class="drop-icon">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                </div>
                 <p class="drop-text">Nhấn để chọn hoặc thả file <b>.eml</b></p>
             </div>
+            <input type="file" id="fileInput" hidden accept=".eml">
+
+            <div id="emailLoading" class="loading hidden">
+                <div class="spinner"></div>
+                <p class="loading-text">Đang phân tích email...</p>
+            </div>
+
+            <div id="emailResult" class="hidden">
+                <div id="emailVerdictBanner" class="verdict-banner"></div>
+                <p id="emailSummary" class="summary-line"></p>
+                <button id="resetEmailBtn" class="reset-btn">Quét lại</button>
+            </div>
         </div>
-        
+
+        <!-- URL -->
         <div id="urlSection" class="hidden">
-            <input type="url" id="urlInput" placeholder="Nhập URL để quét (vd: https://example.com)" class="url-input">
-            <button id="scanUrlBtn" class="scan-btn">Quét URL</button>
+            <div id="urlInputContainer">
+                <input type="url" id="urlInput" placeholder="Nhập URL (vd: https://example.com)" class="url-input">
+                <button id="scanUrlBtn" class="scan-btn">Quét URL</button>
+            </div>
+
+            <div id="urlLoading" class="loading hidden">
+                <div class="spinner emerald"></div>
+                <p class="loading-text">Đang phân tích URL...</p>
+            </div>
+
+            <div id="urlResult" class="hidden">
+                <div id="urlVerdictBanner" class="verdict-banner"></div>
+                <p id="urlSummary" class="summary-line"></p>
+                <button id="resetUrlBtn" class="reset-btn">Quét lại</button>
+            </div>
         </div>
 
-        <div id="loading" class="hidden">
-            <div class="spinner"></div>
-            <p class="loading-text">Đang phân tích...</p>
-        </div>
-
-        <div id="resultArea" class="hidden">
-            <div id="contentRes" class="res-line"></div>
-            <div id="urlRes" class="res-line"></div>
-        </div>
     </div>
     <script src="popup.js"></script>
 </body>
