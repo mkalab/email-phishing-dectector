@@ -96,7 +96,6 @@
         const banner = document.getElementById('emailVerdictBanner');
         const aiConf = document.getElementById('emailAiConf');
         const emailVerdict = document.getElementById('emailVerdict');
-        const emailContentDetails = document.getElementById('emailContentDetails');
 
         // --- Verdict banner ---
         if (data.final_verdict === 'DANGEROUS') {
@@ -112,27 +111,21 @@
         }
 
         // --- AI confidence ---
-        aiConf.innerText = (data.analysis.ai_confidence * 100).toFixed(1) + '%';
+        aiConf.innerText = (data.email_details.confidence * 100).toFixed(1) + '%';
 
 
 
         // =============================================
         // URL SECTION - tổng / an toàn / đáng ngờ
         // =============================================
-        const suspiciousUrls = data.analysis.suspicious_urls_found || [];
-        const allUrls = data.analysis.all_urls_found || [];
-
-        // Lấy danh sách URL an toàn = tất cả URLs trừ URL đáng ngờ
-        const suspiciousSet = new Set(suspiciousUrls.map(u => u.url));
-        const safeUrls = allUrls.filter(url => !suspiciousSet.has(url));
-
-        const totalCount = allUrls.length > 0
-            ? allUrls.length
-            : (data.analysis.total_urls_found ?? suspiciousUrls.length);
+        const urlAnalysis    = data.url_analysis || {};
+        const safeUrlObjs    = urlAnalysis.safe_urls || [];
+        const suspiciousUrls = urlAnalysis.suspicious_urls_found || [];
+        const totalCount     = urlAnalysis.total_urls ?? (safeUrlObjs.length + suspiciousUrls.length);
 
         // Cập nhật số liệu thống kê
         document.getElementById('urlTotalCount').innerText = totalCount;
-        document.getElementById('urlSafeCount').innerText = safeUrls.length;
+        document.getElementById('urlSafeCount').innerText = safeUrlObjs.length;
         document.getElementById('urlThreatCount').innerText = suspiciousUrls.length;
 
         // Màu sắc cho số đáng ngờ
@@ -144,18 +137,23 @@
         // --- Danh sách URL AN TOÀN ---
         const safeUrlsList = document.getElementById('safeUrlsList');
         safeUrlsList.innerHTML = '';
-        if (safeUrls.length === 0) {
+        if (safeUrlObjs.length === 0) {
             const li = document.createElement('li');
             li.className = 'text-gray-500 italic text-sm';
             li.innerText = 'Không có URL an toàn';
             safeUrlsList.appendChild(li);
         } else {
-            safeUrls.forEach(url => {
+            safeUrlObjs.forEach(urlInfo => {
                 const li = document.createElement('li');
-                li.className = 'flex items-start gap-2 text-emerald-300 bg-emerald-500/10 rounded-xl px-4 py-2 border border-emerald-500/20';
+                li.className = 'flex flex-col text-emerald-300 bg-emerald-500/10 rounded-xl px-4 py-2 border border-emerald-500/20';
                 li.innerHTML = `
-                    <span class="shrink-0 mt-0.5"></span>
-                    <span class="font-mono text-sm break-all">${url}</span>`;
+                    <div class="flex items-start gap-2">
+                        <span class="shrink-0 mt-0.5"></span>
+                        <span>
+                            <span class="font-mono text-sm break-all">${urlInfo.url}</span>
+                            <span class="text-emerald-400/70 text-xs ml-2">rủi ro lừa đảo: ${(urlInfo.confidence * 100).toFixed(1)}%</span>
+                        </span>
+                    </div>`;
                 safeUrlsList.appendChild(li);
             });
         }
@@ -171,13 +169,15 @@
         } else {
             suspiciousUrls.forEach(urlInfo => {
                 const li = document.createElement('li');
-                li.className = 'flex items-start gap-2 text-red-300 bg-red-500/10 rounded-xl px-4 py-2 border border-red-500/20';
+                li.className = 'flex flex-col text-red-300 bg-red-500/10 rounded-xl px-4 py-2 border border-red-500/20';
                 li.innerHTML = `
-                    <span class="shrink-0 mt-0.5">⚠️</span>
-                    <span>
-                        <span class="font-mono text-sm break-all">${urlInfo.url}</span>
-                        <span class="text-red-400/70 text-xs ml-2">(${(urlInfo.confidence * 100).toFixed(1)}%)</span>
-                    </span>`;
+                    <div class="flex items-start gap-2">
+                        <span class="shrink-0 mt-0.5"></span>
+                        <span>
+                            <span class="font-mono text-sm break-all">${urlInfo.url}</span>
+                            <span class="text-red-400/70 text-xs ml-2">rủi ro lừa đảo: ${(urlInfo.confidence * 100).toFixed(1)}%</span>
+                        </span>
+                    </div>`;
                 suspiciousUrlsList.appendChild(li);
             });
         }
@@ -227,13 +227,58 @@
 
         if (data.error) {
             banner.className = 'rounded-2xl p-6 mb-8 text-center text-2xl font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 animate__animated animate__fadeIn';
-            banner.innerText = '⚠️ KHÔNG THỂ PHÂN TÍCH';
+            banner.innerText = 'KHÔNG THỂ PHÂN TÍCH';
         } else if (data.is_phishing) {
             banner.className = 'rounded-2xl p-6 mb-8 text-center text-2xl font-bold bg-red-500/20 text-red-400 border border-red-500/50 animate__animated animate__headShake';
-            banner.innerText = '⚠️ PHÁT HIỆN LỪA ĐẢO';
+            banner.innerText = 'PHÁT HIỆN LỪA ĐẢO';
         } else {
             banner.className = 'rounded-2xl p-6 mb-8 text-center text-2xl font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 animate__animated animate__fadeIn';
             banner.innerText = 'URL AN TOÀN';
+        }
+
+        // --- Hiển thị toàn bộ features ---
+        // Tự tạo element nếu HTML chưa có id="urlFeatures"
+        let featuresEl = document.getElementById('urlFeatures');
+        if (!featuresEl) {
+            featuresEl = document.createElement('div');
+            featuresEl.id = 'urlFeatures';
+            featuresEl.className = 'mt-4';
+            document.getElementById('urlResult').appendChild(featuresEl);
+        }
+
+        if (!data.error && data.features && Object.keys(data.features).length > 0) {
+            const colorClass = (v) => {
+                if (v === 0 || v === false) return 'text-gray-500';
+                if (v === 1 || v === true) return 'text-yellow-300 font-semibold';
+                if (typeof v === 'number' && v > 0) return 'text-cyan-300';
+                return 'text-gray-200';
+            };
+            const rows = Object.entries(data.features)
+                .map(([k, v]) => `
+                    <tr class="border-b border-gray-700/30 hover:bg-gray-700/20">
+                        <td class="py-1 pr-6 text-gray-400 text-xs font-mono whitespace-nowrap">${k}</td>
+                        <td class="py-1 text-xs font-mono ${colorClass(v)}">${v}</td>
+                    </tr>`)
+                .join('');
+            featuresEl.innerHTML = `
+                <details class="mt-2" open>
+                    <summary class="text-sm text-gray-300 cursor-pointer hover:text-white font-semibold mb-2 select-none">
+                        URL Features <span class="text-gray-500 font-normal">(${Object.keys(data.features).length} features)</span>
+                    </summary>
+                    <div class="overflow-x-auto rounded-xl border border-gray-700/50 mt-2">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-700 bg-gray-800/50">
+                                    <th class="text-left text-xs text-gray-500 py-2 px-3 font-mono">Feature</th>
+                                    <th class="text-left text-xs text-gray-500 py-2 px-3 font-mono">Giá trị</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </details>`;
+        } else {
+            featuresEl.innerHTML = '';
         }
     }
 });

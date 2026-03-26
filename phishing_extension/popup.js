@@ -62,17 +62,17 @@ function showEmailResult(data) {
     document.getElementById('emailResult').classList.remove('hidden');
 
     const isDangerous = data.final_verdict === 'DANGEROUS';
-    const conf        = (data.analysis.ai_confidence * 100).toFixed(1);
-    const suspicious  = (data.analysis.suspicious_urls_found || []).length;
-    const total       = (data.analysis.all_urls_found || []).length;
+    const conf        = (data.email_details.ai_confidence * 100).toFixed(1);
+    const suspicious  = (data.url_analysis.suspicious_urls_found || []).length;
+    const total       = (data.url_analysis.urls || []).length;
 
     const banner = document.getElementById('emailVerdictBanner');
     banner.className = 'verdict-banner ' + (isDangerous ? 'danger' : 'safe');
-    banner.innerText = isDangerous ? '⚠️ PHÁT HIỆN LỪA ĐẢO' : '✅ EMAIL AN TOÀN';
+    banner.innerText = isDangerous ? 'PHÁT HIỆN LỪA ĐẢO' : 'EMAIL AN TOÀN';
 
     const urlPart = total > 0 ? `${suspicious}/${total} link đáng ngờ` : 'Không có link';
     const summary = document.getElementById('emailSummary');
-    summary.innerHTML = `Độ tin cậy AI: <b>${conf}%</b>&nbsp;&nbsp;|&nbsp;&nbsp;${urlPart}`;
+    summary.innerHTML = `Rủi ro lừa đảo: <b>${conf}%</b>&nbsp;&nbsp;|&nbsp;&nbsp;${urlPart}`;
     summary.className = 'summary-line ' + (isDangerous ? 'red-text' : 'green-text');
 }
 
@@ -115,19 +115,19 @@ function showUrlResult(data) {
 
     if (data.error) {
         banner.className  = 'verdict-banner warn';
-        banner.innerText  = '⚠️ KHÔNG THỂ PHÂN TÍCH';
+        banner.innerText  = 'KHÔNG THỂ PHÂN TÍCH';
         summary.className = 'summary-line';
         summary.innerText = 'Kiểm tra backend đang chạy';
     } else if (data.is_phishing) {
         banner.className  = 'verdict-banner danger';
-        banner.innerText  = '⚠️ PHÁT HIỆN LỪA ĐẢO';
+        banner.innerText  = 'PHÁT HIỆN LỪA ĐẢO';
         summary.className = 'summary-line red-text';
-        summary.innerHTML = `Độ tin cậy: <b>${(data.confidence * 100).toFixed(1)}%</b>`;
+        summary.innerHTML = `Rủi ro lừa đảo: <b>${(data.confidence * 100).toFixed(1)}%</b>`;
     } else {
         banner.className  = 'verdict-banner safe';
-        banner.innerText  = '✅ URL AN TOÀN';
+        banner.innerText  = 'URL AN TOÀN';
         summary.className = 'summary-line green-text';
-        summary.innerHTML = `Độ tin cậy: <b>${(data.confidence * 100).toFixed(1)}%</b>`;
+        summary.innerHTML = `Rủi ro lừa đảo: <b>${(data.confidence * 100).toFixed(1)}%</b>`;
     }
 }
 
